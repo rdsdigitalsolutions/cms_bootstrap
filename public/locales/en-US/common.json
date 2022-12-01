@@ -1,0 +1,6 @@
+{
+    "welcome": "Welcome to",
+    "test": "This is a text dynamically translated (just for testing) to validate the translation.",
+    "signin": "Sign in",
+    "signout": "Sign out"
+}
