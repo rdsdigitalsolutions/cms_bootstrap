@@ -1,33 +1,34 @@
-import { useTranslation } from 'next-i18next'
 import { useSession } from "next-auth/react"
-
 import { useRouter } from 'next/router';
+
 import Footer from './footer'
 import Navbar from './navbar'
-import { Switch, useTheme, Container, Row, Col, Button, Link, Text, Card, Radio } from '@nextui-org/react';
+import Loading from './loading-page'
+import { Container } from '@nextui-org/react';
 
 import styles from '../styles/Home.module.css'
 
-export default function Layout({ children, locale }) {
-  const { t } = useTranslation('common')
-  const { data: session, status } = useSession()
+export default function ComponentHandler({ children, locale, providers, loading = false, restricted = false }) {
   const router = useRouter();
 
+  const { data: session, status: sessionStatus } = useSession({
+    required: restricted,
+    onUnauthenticated() {
+      router.push('/');
+    }
+  });
+
+  if (loading || (restricted && sessionStatus === 'loading')) {
+    return <Container fluid className={styles.main}><Loading /></Container>
+  }
+
   return (
-    <Container fluid>
-      <main>
-        <Navbar locale={locale}/>
-        { status !== 'authenticated' && <main className={styles.main}>
-          <h1 className={styles.title}>
-          { `${t('welcome')} ${process.env.NEXT_PUBLIC_APP_NAME}` }
-          </h1>
-
-          <p>{ t('test') }</p>
-        </main> }
-
-        {status === 'authenticated' && children}
-        <Footer />
-      </main>
-    </Container>
+    <>
+      <Navbar locale={locale} providers={providers} session={session} sessionStatus={sessionStatus} />
+      <Container fluid className={styles.main}>
+        {children}
+      </Container>
+      <Footer />
+    </>
   )
 }

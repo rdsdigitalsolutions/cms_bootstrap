@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next'
 import { signIn } from "next-auth/react"
-import { Loading, Grid, Modal, Checkbox, Input, Row, Button, Text, Spacer } from '@nextui-org/react';
+import { Loading, Grid, Modal, Checkbox, Input, Row, Button, Text } from '@nextui-org/react';
 import { FaUserCircle, FaLock, FaGrinBeam, FaChevronRight } from "react-icons/fa";
 
-export default function Handler({ visible, setVisible }) {
-  const { t } = useTranslation('common')
+export default function ComponentHandler({ visible, setVisible, providers, locale = '' }) {
+  const { t } = useTranslation('common');
+  const router = useRouter();
 
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -20,7 +22,9 @@ export default function Handler({ visible, setVisible }) {
         setPassword('');
 
         if (!result.error) {
-          return setVisible(false)
+          setVisible(false);
+          router.push('/admin');
+          return
         }
 
         switch (result.error) {
@@ -33,6 +37,12 @@ export default function Handler({ visible, setVisible }) {
             break;
         }
       })
+      .catch((error) => setError(error))
+      .finally(() => setProcessing(false))
+  }
+
+  const handleSocialLogin = (event) => {
+    signIn(event.target.value, { callbackUrl: `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/${locale}`, redirect: false })
       .catch((error) => setError(error))
       .finally(() => setProcessing(false))
   }
@@ -55,7 +65,14 @@ export default function Handler({ visible, setVisible }) {
           </Grid>
         </Grid.Container>
       </Modal.Header>
+
       <Modal.Body>
+        {providers && <Grid.Container gap={1}>
+          {Object.values(providers).filter((provider) => provider.name !== 'Credentials').map((provider, index) => <Grid key={index} xs={12} justify="center">
+            <Button bordered onClick={handleSocialLogin} value={provider.id}>Sign in with {provider.name}</Button>
+          </Grid>)}
+        </Grid.Container>}
+
         <Grid.Container gap={4}>
           <Grid xs={12} justify="center">
             <Input
@@ -95,9 +112,9 @@ export default function Handler({ visible, setVisible }) {
               <Text size={14}>Forgot password?</Text>
             </Row>
           </Grid>
-          { error && <Grid xs={12} justify="center">
+          {error && <Grid xs={12} justify="center">
             <Text h6 color="error">{error}</Text>
-          </Grid> }
+          </Grid>}
         </Grid.Container>
       </Modal.Body>
       <Modal.Footer justify="center">

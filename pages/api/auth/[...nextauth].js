@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import GithubProvider from "next-auth/providers/github"
+import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
@@ -7,6 +8,17 @@ export const authOptions = {
         GithubProvider({
             clientId: process.env.GITHUB_ID,
             clientSecret: process.env.GITHUB_SECRET,
+        }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            profile(profile) {
+                return {
+                    // Return all the profile information you need.
+                    // The only truly required field is `id`
+                    // to be able identify the account when added to a database
+                }
+            },
         }),
         CredentialsProvider({
             name: "Credentials",
@@ -22,7 +34,7 @@ export const authOptions = {
                 }
 
                 // @todo: implement real DB request to validate user.
-                const user = { id: "1", name: "J Smith", email: credentials.username, image: './picture/image.jpg' }
+                const user = { id: "1", name: "J Smith", email: credentials.username, image: '/test_profile_picture.jpeg' }
                 return user || null;
             }
         })
