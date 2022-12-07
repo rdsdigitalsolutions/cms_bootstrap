@@ -206,14 +206,23 @@ export default function ComponentHandler({ children, locale, providers, session,
 
         <Navbar.Collapse showIn="xs">
           <Navbar.CollapseItem>
-            <Link
-              color="inherit"
-              css={{
-                minWidth: "100%",
-              }}
-              onClick={() => setLoginModalVisible(true)}
-            >
-              {t('signin')}
+            <Link color="inherit" css={{ minWidth: "100%" }} onClick={() => setLoginModalVisible(true)}>
+              {t('global_login')}
+            </Link>
+          </Navbar.CollapseItem>
+          <Navbar.CollapseItem>
+            <Link color="inherit" css={{ minWidth: "100%" }} onClick={() => router.push('/')}>
+              {t('menu_home')}
+            </Link>
+          </Navbar.CollapseItem>
+          <Navbar.CollapseItem>
+            <Link color="inherit" css={{ minWidth: "100%" }} onClick={() => router.push('/about')}>
+              {t('menu_about')}
+            </Link>
+          </Navbar.CollapseItem>
+          <Navbar.CollapseItem>
+            <Link color="inherit" css={{ minWidth: "100%" }} onClick={() => router.push('/features')}>
+              {t('menu_features')}
             </Link>
           </Navbar.CollapseItem>
         </Navbar.Collapse>

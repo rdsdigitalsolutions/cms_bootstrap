@@ -25,7 +25,7 @@ export default function ComponentHandler({ children, locale, providers, loading 
   return (
     <>
       <Navbar locale={locale} providers={providers} session={session} sessionStatus={sessionStatus} />
-      <Container fluid className={styles.main}>
+      <Container className={styles.main}>
         {children}
       </Container>
       <Footer />

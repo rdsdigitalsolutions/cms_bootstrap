@@ -20,7 +20,7 @@ export default function ComponentHandler({ locale, providers }) {
       </Head>
 
       <Layout locale={locale} providers={providers}>
-        <Text h1 size={110} css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%" }} weight="bold">
+        <Text h1 css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%", fontSize: '7vw' }} weight="bold">
           {process.env.NEXT_PUBLIC_APP_NAME}
         </Text>
 

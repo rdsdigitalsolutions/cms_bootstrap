@@ -59,7 +59,7 @@ export default function ComponentHandler({ locale, originalProducts }) {
 
         <Grid.Container gap={4} justify="center">
           <Grid xs={12} justify="center">
-            <Text h1 size={60} css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%" }} weight="bold">{products.length} {t('product_title')}</Text>
+            <Text h1 css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%", fontSize: '4vw' }} weight="bold">{products.length} {t('product_title')}</Text>
           </Grid>
           <Grid xs={5} justify="center">
             <Input

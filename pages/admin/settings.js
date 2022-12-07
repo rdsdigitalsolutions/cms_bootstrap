@@ -17,7 +17,7 @@ export default function ComponentHandler({ locale }) {
       </Head>
 
       <Layout locale={locale} restricted={true}>
-          <Text h1 size={110} css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%" }} weight="bold">{t('settings_title')}</Text>
+          <Text h1 css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%", fontSize: '7vw' }} weight="bold">{t('settings_title')}</Text>
           <Text h6>{t('global_test')}</Text>
       </Layout>
     </>
