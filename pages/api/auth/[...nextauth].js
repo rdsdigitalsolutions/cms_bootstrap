@@ -3,6 +3,8 @@ import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { findOne } from '../../../repository/user'
+
 export const authOptions = {
     providers: [
         GithubProvider({
@@ -34,7 +36,7 @@ export const authOptions = {
                 }
 
                 // @todo: implement real DB request to validate user.
-                const user = { id: "1", name: "J Smith", email: credentials.username, image: '/test_profile_picture.jpeg' }
+                const user = await findOne( { email: credentials.username, password: credentials.password } );
                 return user || null;
             }
         })
@@ -42,9 +44,10 @@ export const authOptions = {
     callbacks: {
         // Use this to map properties to the current session.
         async session({ session, token }) {
-            session.user.details = token
+            session.user.id = token.sub
+            // console.log('Session User:', session, token)
             return session
-        }
+        },
     }
 }
 export default NextAuth(authOptions)

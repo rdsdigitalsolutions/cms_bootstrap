@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next'
 import { signIn } from "next-auth/react"
@@ -8,11 +8,30 @@ import { FaUserCircle, FaLock, FaGrinBeam, FaChevronRight } from "react-icons/fa
 export default function ComponentHandler({ visible, setVisible, providers, locale = '' }) {
   const { t } = useTranslation('common');
   const router = useRouter();
+  const { query } = router
 
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => { query.error ? handleErrorMessages(query.error): null }, [query.error] );
+
+  const handleErrorMessages = (errorMessage) => {
+    router.push('/');
+
+    switch (errorMessage) {
+      case 'CredentialsSignin':
+        setError(t('errors_invalid_credentials'));
+        break;
+      case 'OAuthSignin':
+        setError(t('errors_oauth_signin'));
+        break;
+      default:
+        setError(t('errors_unknown'));
+        break;
+    }
+  }
 
   const handleForm = () => {
     setProcessing(true);
@@ -22,20 +41,12 @@ export default function ComponentHandler({ visible, setVisible, providers, local
         setPassword('');
 
         if (!result.error) {
-          setVisible(false);
           router.push('/admin');
+          setVisible(false);
           return
         }
 
-        switch (result.error) {
-          case 'CredentialsSignin':
-            setError('Invalid Credentials');
-            break;
-          default:
-            console.log('Login Error:', result)
-            setError('Unknown error, please contact the support.');
-            break;
-        }
+        handleErrorMessages(result.error);
       })
       .catch((error) => setError(error))
       .finally(() => setProcessing(false))
@@ -69,7 +80,7 @@ export default function ComponentHandler({ visible, setVisible, providers, local
       <Modal.Body>
         {providers && <Grid.Container gap={1}>
           {Object.values(providers).filter((provider) => provider.name !== 'Credentials').map((provider, index) => <Grid key={index} xs={12} justify="center">
-            <Button bordered onClick={handleSocialLogin} value={provider.id}>Sign in with {provider.name}</Button>
+            <Button bordered onClick={handleSocialLogin} value={provider.id}>{t('global_sign_in_with')} {provider.name}</Button>
           </Grid>)}
         </Grid.Container>}
 
@@ -82,7 +93,7 @@ export default function ComponentHandler({ visible, setVisible, providers, local
               type="email"
               clearable
               underlined
-              labelPlaceholder="Username"
+              labelPlaceholder={t('global_username')}
               contentLeft={<FaUserCircle />}
               initialValue={username}
               value={username}
@@ -96,7 +107,7 @@ export default function ComponentHandler({ visible, setVisible, providers, local
               size="md"
               fullWidth={true}
               underlined
-              labelPlaceholder="Password"
+              labelPlaceholder={t('global_password')}
               contentLeft={<FaLock />}
               initialValue={password}
               value={password}
@@ -107,9 +118,9 @@ export default function ComponentHandler({ visible, setVisible, providers, local
           <Grid xs={12} justify="center">
             <Row justify="space-between">
               <Checkbox>
-                <Text size={14}>Remember me</Text>
+                <Text size={14}>{t('global_remember_me')}</Text>
               </Checkbox>
-              <Text size={14}>Forgot password?</Text>
+              <Text size={14}>{t('global_forgot_password')}?</Text>
             </Row>
           </Grid>
           {error && <Grid xs={12} justify="center">
@@ -118,9 +129,9 @@ export default function ComponentHandler({ visible, setVisible, providers, local
         </Grid.Container>
       </Modal.Body>
       <Modal.Footer justify="center">
-        {!processing ? <Button auto flat color="error" onClick={() => setVisible(false)}>Close</Button> : null}
+        {!processing ? <Button auto flat color="error" onClick={() => setVisible(false)}>{t('global_close')}</Button> : null}
         <Button auto flat onClick={handleForm} disabled={processing}>
-          {processing ? <Loading type="points" color="currentColor" size="sm" /> : <>{t('signin')} <FaChevronRight /></>}
+          {processing ? <Loading type="points" color="currentColor" size="sm" /> : <>{t('global_login')} <FaChevronRight /></>}
         </Button>
       </Modal.Footer>
     </Modal>

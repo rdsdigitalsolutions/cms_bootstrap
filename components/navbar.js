@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next'
 import { signOut } from "next-auth/react"
 import { useRouter } from 'next/router';
-import { Switch, useTheme, Navbar, Link, Text, Dropdown, Avatar, Spacer } from '@nextui-org/react';
+import { Switch, useTheme, Navbar, Link, Text, Dropdown, Avatar, Spacer, Badge } from '@nextui-org/react';
 import { useTheme as useNextTheme } from 'next-themes'
-import { FaUserCircle, FaMoon, FaSun, FaGlobeAmericas } from "react-icons/fa";
+import { FaUserCircle, FaMoon, FaSun, FaGlobeAmericas, FaGrinBeam } from "react-icons/fa";
 
 import NavbarLink from './navbar-link'
 import CredentialsLogin from './credentials-login'
@@ -16,8 +16,10 @@ export default function ComponentHandler({ children, locale, providers, session,
 
   const { setTheme } = useNextTheme();
   const { isDark, type } = useTheme();
-  const [visible, setVisible] = useState(false);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [currentLocale, setCurrentLocale] = useState(new Set([locale]));
+
+  useEffect(() => { query.error ? setLoginModalVisible(true) : null }, [query.error]);
 
   const handleLocale = (nextLocale) => {
     setCurrentLocale(new Set([nextLocale]));
@@ -32,44 +34,35 @@ export default function ComponentHandler({ children, locale, providers, session,
         break;
 
       default:
-        if(actionKey.startsWith('/')) {
+        if (actionKey.startsWith('/')) {
           router.push(actionKey);
         } else {
           console.log('Navbar Action:', actionKey);
         }
-        
+
         break;
     }
   }
 
   return (
     <>
-      {visible && <CredentialsLogin setVisible={setVisible} visible={visible} providers={providers} locale={locale} />}
+      {loginModalVisible && <CredentialsLogin setVisible={setLoginModalVisible} visible={loginModalVisible} providers={providers} locale={locale} />}
 
       <Navbar isCompact isBordered variant="static" maxWidth="fluid">
         <Navbar.Brand>
-          <Switch
-            // css={{ background: '$inactive' }}
-            color="default"
-            checked={isDark}
-            onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
-            iconOn={<FaMoon />}
-            iconOff={<FaSun />}
-          />
-          <Spacer x={0.5} />
           <Navbar.Toggle aria-label="toggle navigation" showIn="xs" />
           <Spacer x={0.5} />
           <Text b color="inherit" hideIn="xs">
-            {process.env.NEXT_PUBLIC_APP_NAME}
+            <FaGrinBeam /> {process.env.NEXT_PUBLIC_APP_NAME} <Badge color="warning" size="xs" variant="flat" isSquared>{t('global_beta')}</Badge>
           </Text>
         </Navbar.Brand>
 
         <Navbar.Content hideIn="xs" variant="underline" enableCursorHighlight >
-          <NavbarLink path='/' name={t('Home Page')}  />
-          <NavbarLink path='/customers' name={t('Customers')} />
-          <NavbarLink path='/pricing' name={t('Pricing')} />
+          <NavbarLink path='/' name={t('menu_home')} />
+          <NavbarLink path='/about' name={t('menu_about')} />
+          <NavbarLink path='/features' name={t('menu_features')} />
 
-          { sessionStatus === 'authenticated' && <Dropdown>
+          {sessionStatus === 'authenticated' && <Dropdown>
             <Navbar.Item>
               <Dropdown.Button
                 auto
@@ -79,57 +72,34 @@ export default function ComponentHandler({ children, locale, providers, session,
                   dflex: "center",
                   svg: { pe: "none" },
                 }}
-                // iconRight={icons.chevron}
                 ripple={false}
               >
-                {t('Admin')}
+                {t('menu_admin')}
               </Dropdown.Button>
             </Navbar.Item>
             <Dropdown.Menu
               onAction={handleDropdownActions}
-              color="secondary"
+              color="primary"
               aria-label="Actions"
-              css={{ $$dropdownMenuWidth: "280px" }}
             >
-              <Dropdown.Section title="Actions">
-                <Dropdown.Item
-                  key="/admin"
-                  command="⌘N"
-                  description="Create a new file"
-                >
-                  {t('Dashboard')}
+              <Dropdown.Section>
+                <Dropdown.Item key="/admin/product">
+                  {t('menu_admin_product')}
                 </Dropdown.Item>
-                <Dropdown.Item
-                  key="/admin/settings"
-                  command="⌘N"
-                  description="Create a new file"
-                >
-                  {t('Settings')}
+                <Dropdown.Item key="/admin" >
+                  {t('menu_admin_dashboard')}
                 </Dropdown.Item>
-              </Dropdown.Section>
-              <Dropdown.Section title="Danger zone">
-                <Dropdown.Item
-                  key="delete"
-                  color="error"
-                  command="⌘⇧D"
-                  description="Permanently delete the file"
-                >
-                  Delete file
+                <Dropdown.Item key="/admin/settings">
+                  {t('menu_admin_settings')}
                 </Dropdown.Item>
               </Dropdown.Section>
             </Dropdown.Menu>
-          </Dropdown> }
+          </Dropdown>}
 
         </Navbar.Content>
 
-        <Navbar.Content enableCursorHighlight css={{
-          "@xs": {
-            w: "12%",
-            jc: "flex-end",
-          },
-        }}
-        >
-          {sessionStatus !== 'authenticated' && <Navbar.Link onClick={() => setVisible(true)} hideIn="xs"><FaUserCircle /><Spacer x={0.5} />{t('signin')}</Navbar.Link>}
+        <Navbar.Content enableCursorHighlight css={{ "@xs": { w: "12%", jc: "flex-end" } }}>
+          {sessionStatus !== 'authenticated' && <Navbar.Link onClick={() => setLoginModalVisible(true)} hideIn="xs"><FaUserCircle /><Spacer x={0.5} />{t('global_login')}</Navbar.Link>}
 
           {sessionStatus === 'authenticated' && <Dropdown placement="bottom-right">
             <Navbar.Item>
@@ -137,9 +107,9 @@ export default function ComponentHandler({ children, locale, providers, session,
                 <Avatar
                   bordered
                   as="button"
-                  color="secondary"
+                  color="primary"
                   size="md"
-                  src={`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}${session.user.image}`}
+                  src={`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/${session.user.image}`}
                 />
               </Dropdown.Trigger>
             </Navbar.Item>
@@ -148,19 +118,19 @@ export default function ComponentHandler({ children, locale, providers, session,
               color="secondary"
               onAction={handleDropdownActions}
             >
-              <Dropdown.Item key="" css={{ height: "$18" }}>
-                <Text b color="inherit" css={{ d: "flex" }}>
-                  Signed in as
+              <Dropdown.Item key="" css={{ height: "$20" }}>
+                <Text h4 b color="inherit" css={{ d: "flex" }}>
+                  {session.user.name}
                 </Text>
-                <Text b color="inherit" css={{ d: "flex" }}>
+                <Text h6 b color="inherit" css={{ d: "flex" }}>
                   {session.user.email}
                 </Text>
               </Dropdown.Item>
               <Dropdown.Item key="/admin/profile" withDivider>
-                My Profile
+                {t('menu_admin_account')}
               </Dropdown.Item>
               <Dropdown.Item key="logout" withDivider color="error">
-                Log Out
+              {t('global_logout')}
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>}
@@ -175,7 +145,6 @@ export default function ComponentHandler({ children, locale, providers, session,
                   dflex: "center",
                   svg: { pe: "none" },
                 }}
-                // iconRight={icons.chevron}
                 ripple={false}
               >
                 <FaGlobeAmericas />
@@ -222,6 +191,17 @@ export default function ComponentHandler({ children, locale, providers, session,
             </Dropdown.Menu>
           </Dropdown>
 
+          <Navbar.Item>
+            <Switch
+              // css={{ background: '$inactive' }}
+              color="default"
+              checked={isDark}
+              onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
+              iconOn={<FaMoon />}
+              iconOff={<FaSun />}
+            />
+          </Navbar.Item>
+
         </Navbar.Content>
 
         <Navbar.Collapse showIn="xs">
@@ -231,7 +211,7 @@ export default function ComponentHandler({ children, locale, providers, session,
               css={{
                 minWidth: "100%",
               }}
-              onClick={() => setVisible(true)}
+              onClick={() => setLoginModalVisible(true)}
             >
               {t('signin')}
             </Link>
