@@ -2,6 +2,21 @@
 This is a skeleton that contain basic UI/UX functionality to start any project that demand a restricted area. 
 
 # How to Use
+1. Rename `./.env.local.sample` to `./.env.local`.
+2. Make sure all values are correct in the `./.env.local`.
+3. In your terminal execute:
+  - For local development: `npm run dev`
+  - For production: `npm run build && npm run start`
+
+# Food Truck Search(example) Details
+
+1. Login to see the `Food Truck` menu.
+  - Username: `test@testing.com`
+  - Password: `rSnsw8mD5YEb`
+
+<p align="center">
+  <img src="./public/food-truck.png" alt="Home Page"/>
+</p>
 
 # References
 All references used in thsi project.
@@ -22,32 +37,10 @@ https://nextjs.org/docs/advanced-features/i18n-routing
 https://dummyjson.com/
 
 
-# Visuals
+# Author & Credits
 
-<p align="center">
-  <img src="./public/homepage.png" alt="Home Page"/>
-</p>
+Rafael de Souza
 
-<p align="center">
-  <img src="./public/login.png" alt="Login Page"/>
-</p>
+Senior API/Web Developer
 
-<p align="center">
-  <img src="./public/admin.png" alt="Admin Page"/>
-</p>
-
-<p align="center">
-  <img src="./public/account.png" alt="Account Page"/>
-</p>
-
-<p align="center">
-  <img src="./public/homepage2.png" alt="Home Page 2"/>
-</p>
-
-<p align="center">
-  <img src="./public/mobile-homepage.png" alt="Home Page Mobile"/>
-</p>
-
-<p align="center">
-  <img src="./public/mobile-features.png" alt="Features Page"/>
-</p>
+RDS Digital Solutions
