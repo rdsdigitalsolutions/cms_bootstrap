@@ -61,6 +61,7 @@ export default function ComponentHandler({ children, locale, providers, session,
           <NavbarLink path='/' name={t('menu_home')} />
           <NavbarLink path='/about' name={t('menu_about')} />
           <NavbarLink path='/features' name={t('menu_features')} />
+          <NavbarLink path='/food-truck' name={t('Food Truck')} sessionStatus={sessionStatus}/>
 
           {sessionStatus === 'authenticated' && <Dropdown>
             <Navbar.Item>
