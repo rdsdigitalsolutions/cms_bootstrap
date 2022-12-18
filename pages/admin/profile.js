@@ -3,11 +3,12 @@ import Head from 'next/head'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { unstable_getServerSession } from "next-auth/next"
 import { useTranslation } from 'next-i18next'
+import { useForm, Controller } from "react-hook-form";
 import { Card, Grid, Input, Text, Button, Loading, Avatar } from '@nextui-org/react';
-import { FaChevronRight } from "react-icons/fa";
 
 import { authOptions } from "./../api/auth/[...nextauth]"
 import Layout from '../../components/layout'
+import DefaultFetch from '../../lib/default-fetch'
 
 export default function ComponentHandler({ locale, session }) {
   const { t } = useTranslation('common');
@@ -15,23 +16,26 @@ export default function ComponentHandler({ locale, session }) {
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  const [fullName, setFullName] = useState(session.user.name);
-  const [username, setUsername] = useState(session.user.email);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-
-  const handleForm = () => {
-    setProcessing(true);
-    setPassword('');
-    setConfirmPassword('');
-
-    if ((password || confirmPassword) && password !== confirmPassword) {
-      setProcessing(false);
-      setError(t('errors_paswrod_mismatch'))
+  const { handleSubmit, control, reset } = useForm({
+    defaultValues: {
+      fullName: session.user.name,
+      email: session.user.email,
     }
+  });
 
-    // @todo: handle user update.
+  const onSubmit = data => {
+    setProcessing(true);
+
+    DefaultFetch({
+      url: `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/v1/user`,
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+      .then((data) => {
+        if (data.error) setError(data.error);
+        console.log('Save Profile Response:', data);
+      })
+      .finally(() => setProcessing(false))
   }
 
   return (
@@ -46,102 +50,127 @@ export default function ComponentHandler({ locale, session }) {
         <Grid.Container gap={4} justify="center">
           <Grid xs={12} md={6} >
             <Card>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <Card.Header>
+                  <Grid.Container css={{ pl: "$6" }}>
+                    <Grid xs={12} justify="center">
+                      <Avatar
+                        bordered
+                        color="primary"
+                        size="xl"
+                        src={`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/${session.user.image}`}
+                      />
+                    </Grid>
+                    <Grid xs={12} justify="center">
+                      <Text h1 css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%", fontSize: '4vw' }} weight="bold">{t('account_title')}</Text>
+                    </Grid>
+                  </Grid.Container>
+                </Card.Header>
 
-              <Card.Header>
-                <Grid.Container css={{ pl: "$6" }}>
-                  <Grid xs={12} justify="center">
-                    <Avatar
-                      bordered
-                      color="primary"
-                      size="xl"
-                      src={`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/${session.user.image}`}
+                <Card.Body>
+                  <Grid xs={12}>
+                    <Controller
+                      name="fullName"
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => <Input
+                        {...field}
+                        size="md"
+                        fullWidth={true}
+                        type="text"
+                        underlined
+                        labelPlaceholder={t('global_full_name')}
+                        disabled={processing}
+                      />}
+                    />
+
+                  </Grid>
+                  <Grid xs={12}>
+                    <Controller
+                      name="email"
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => <Input
+                        {...field}
+                        size="md"
+                        fullWidth={true}
+                        type="text"
+                        underlined
+                        labelPlaceholder={t('global_username')}
+                        disabled={processing}
+                      />}
+                    />
+
+                  </Grid>
+                  <Grid xs={12}>
+                    <Controller
+                      name="currentPassword"
+                      control={control}
+                      rules={{ required: false }}
+                      render={({ field }) => <Input.Password
+                        {...field}
+                        size="md"
+                        fullWidth={true}
+                        type="text"
+                        underlined
+                        labelPlaceholder={t('global_current_password')}
+                        disabled={processing}
+                      />}
+                    />
+
+                  </Grid>
+                  <Grid xs={12}>
+                    <Controller
+                      name="newPassword"
+                      control={control}
+                      rules={{ required: false }}
+                      render={({ field }) => <Input.Password
+                        {...field}
+                        size="md"
+                        fullWidth={true}
+                        type="text"
+                        underlined
+                        labelPlaceholder={t('global_new_password')}
+                        disabled={processing}
+                      />}
+                    />
+
+                  </Grid>
+                  <Grid xs={12}>
+                    <Controller
+                      name="confirmPassword"
+                      control={control}
+                      rules={{ required: false }}
+                      render={({ field }) => <Input.Password
+                        {...field}
+                        size="md"
+                        fullWidth={true}
+                        type="text"
+                        underlined
+                        labelPlaceholder={t('global_password_confirmation')}
+                        disabled={processing}
+                      />}
                     />
                   </Grid>
+
+                  {error && <Grid xs={12}>
+                    <Text h6 color="error">{error}</Text>
+                  </Grid>}
+                </Card.Body>
+
+                <Card.Footer>
                   <Grid xs={12} justify="center">
-                    <Text h1 css={{ textGradient: "45deg, $yellow600 -20%, $red600 100%", fontSize: '4vw' }} weight="bold">{t('account_title')}</Text>
+                    {/* <Button auto flat onClick={handleForm} disabled={processing}> */}
+                    <Button auto flat disabled={processing} type="submit">
+                      {processing ? <Loading type="points" color="currentColor" size="lg" /> : t('global_save')}
+                    </Button>
                   </Grid>
-                </Grid.Container>
-              </Card.Header>
-
-              <Card.Body>
-                <Grid xs={12}>
-                  <Input
-                    name='fullName'
-                    size="md"
-                    fullWidth={true}
-                    type="text"
-                    clearable
-                    underlined
-                    labelPlaceholder={t('global_full_name')}
-                    // contentLeft={<FaUserCircle />}
-                    initialValue={fullName}
-                    value={fullName}
-                    onChange={(event) => setFullName(event.target.value)}
-                    disabled={processing}
-                  />
-                </Grid>
-                <Grid xs={12}>
-                  <Input
-                    name='username'
-                    size="md"
-                    fullWidth={true}
-                    type="email"
-                    clearable
-                    underlined
-                    labelPlaceholder={t('global_username')}
-                    // contentLeft={<FaUserCircle />}
-                    initialValue={username}
-                    value={username}
-                    onChange={(event) => setUsername(event.target.value)}
-                    disabled={processing}
-                  />
-                </Grid>
-                <Grid xs={12}>
-                  <Input.Password
-                    name='password'
-                    size="md"
-                    fullWidth={true}
-                    underlined
-                    labelPlaceholder={t('global_password')}
-                    // contentLeft={<FaLock />}
-                    initialValue={password}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    disabled={processing}
-                  />
-                </Grid>
-                <Grid xs={12}>
-                  <Input.Password
-                    name='confirmPassword'
-                    size="md"
-                    fullWidth={true}
-                    underlined
-                    labelPlaceholder={t('global_password_confirmation')}
-                    // contentLeft={<FaLock />}
-                    initialValue={password}
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    disabled={processing}
-                  />
-                </Grid>
-
-                {error && <Grid xs={12}>
-                  <Text h6 color="error">{error}</Text>
-                </Grid>}
-              </Card.Body>
-
-              <Card.Footer>
-                <Grid xs={12} justify="right">
-                  {/* <Button auto flat onClick={handleForm} disabled={processing}> */}
-                  <Button auto flat onClick={handleForm} disabled={true}>
-                    {processing ? <Loading type="points" color="currentColor" size="sm" /> : <>{t('global_save')} <FaChevronRight /></>}
-                  </Button>
-                </Grid>
-              </Card.Footer>
-
+                </Card.Footer>
+              </form>
             </Card>
           </Grid>
         </Grid.Container>
+
       </Layout>
     </>
   )

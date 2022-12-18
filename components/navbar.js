@@ -10,9 +10,9 @@ import NavbarLink from './navbar-link'
 import CredentialsLogin from './credentials-login'
 
 export default function ComponentHandler({ children, locale, providers, session, sessionStatus }) {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation('common');
   const router = useRouter();
-  const { pathname, asPath, query } = router
+  const { pathname, asPath, query } = router;
 
   const { setTheme } = useNextTheme();
   const { isDark, type } = useTheme();
@@ -57,7 +57,7 @@ export default function ComponentHandler({ children, locale, providers, session,
           </Text>
         </Navbar.Brand>
 
-        <Navbar.Content hideIn="xs" variant="underline" enableCursorHighlight >
+        <Navbar.Content hideIn="md" variant="underline" enableCursorHighlight >
           <NavbarLink path='/' name={t('menu_home')} />
           <NavbarLink path='/about' name={t('menu_about')} />
           <NavbarLink path='/features' name={t('menu_features')} />
